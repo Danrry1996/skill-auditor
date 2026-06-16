@@ -1,51 +1,169 @@
 # Skill Auditor
 
+[![Agent Skill](https://img.shields.io/badge/agent-skill-0ea5e9)](SKILL.md)
+[![Python](https://img.shields.io/badge/python-3.9%2B-3776ab)](scripts/audit_skill.py)
+[![License: MIT](https://img.shields.io/badge/license-MIT-111827)](LICENSE)
+
+[English](README.md) | [简体中文](README.zh-CN.md)
+
 ![Skill Auditor hero](assets/skill-auditor-hero.png)
 
-Audit third-party agent skills, Claude Code plugins, Codex skills, and install scripts before you trust them.
+**Audit third-party agent skills before you install them.**
 
-`skill-auditor` gives an agent a repeatable review workflow plus a static scanner for common risk signals: remote shell pipes, broad deletes, credential access, unsafe permissions, dynamic eval, network posts, and global installs.
+`skill-auditor` is a Codex/Claude-style agent skill plus a local static scanner for reviewing skills, plugins, install scripts, and MCP-adjacent bundles. It helps an agent answer the question that matters before installation:
+
+> Can I trust this skill enough to run it on my machine?
+
+## Why This Exists
+
+Agent skills are powerful because they combine instructions, scripts, dependencies, and local file access. That also makes them a supply-chain surface. A polished README, lots of stars, or a familiar author does not prove a skill is safe.
+
+`skill-auditor` gives your agent a repeatable review workflow:
+
+- inspect the `SKILL.md` instructions
+- scan scripts and manifests for static risk signals
+- review credential, filesystem, network, and install behavior
+- produce an install verdict with file/line evidence
+- recommend sandboxing or patches before trust is granted
 
 ## Quick Start
 
-Install as an agent skill by cloning this repository into your skills folder:
+Clone this repository into your agent's skills folder.
+
+For Codex-style skills:
 
 ```bash
-git clone https://github.com/<your-username>/skill-auditor.git ~/.codex/skills/skill-auditor
+git clone https://github.com/Danrry1996/skill-auditor.git ~/.codex/skills/skill-auditor
 ```
 
-Then ask:
+For Claude Code-style skills:
+
+```bash
+git clone https://github.com/Danrry1996/skill-auditor.git ~/.claude/skills/skill-auditor
+```
+
+On Windows PowerShell:
+
+```powershell
+git clone https://github.com/Danrry1996/skill-auditor.git "$env:USERPROFILE\.codex\skills\skill-auditor"
+```
+
+If your agent uses a different skills directory, clone the repository there. The repository root contains `SKILL.md`.
+
+Then ask your agent:
 
 ```text
-Use skill-auditor to review this skill before I install it: <path-or-url>
+Use $skill-auditor to review this skill before I install it: <path-or-url>
 ```
 
-Run the scanner directly:
+## Run the Scanner Directly
+
+The bundled scanner is dependency-free Python. It only reads files; it does not execute the target repository.
 
 ```bash
 python scripts/audit_skill.py ./some-skill
 python scripts/audit_skill.py ./some-skill --json > audit-report.json
 ```
 
+Example output:
+
+```text
+# Skill Audit Report
+
+- Risk level: high
+- Score: 55 / 100
+- Findings: 3
+
+### CRITICAL - Remote download is piped directly into an interpreter
+- Rule: remote-shell-pipe
+- Location: scripts/install.sh:12
+- Recommendation: Download to a file first, inspect it, and execute only after explicit approval.
+```
+
 ## What It Checks
 
-- `SKILL.md` instructions that ask for secrets, broad permissions, or unsafe cleanup
-- install scripts that pipe remote downloads into shells
-- scripts/hooks that read credentials, delete broad paths, post data, or run dynamic eval
-- package/manifests with global installs or lifecycle risk
-- missing confirmation, rollback, sandbox, and data-handling boundaries
+| Area | Examples |
+| --- | --- |
+| Remote execution | network downloads piped into shells or interpreters |
+| Destructive actions | recursive force deletes, broad cleanup commands, unsafe path handling |
+| Secrets | API keys, token stores, private keys, full environment dumps |
+| Permissions | world-writable files, admin/root guidance, broad ACL changes |
+| Network behavior | outbound posts, telemetry, file uploads, unclear domains |
+| Dependencies | global installs, unpinned packages, moving branches, lifecycle scripts |
+| Agent instructions | hidden trust requests, approval bypasses, vague data handling |
 
-## Output
+## Verdicts
 
-The skill produces a human verdict:
+`skill-auditor` guides the agent toward one of four outcomes:
 
-- `install`
-- `install with sandbox`
-- `patch first`
-- `reject`
+| Verdict | Meaning |
+| --- | --- |
+| `install` | No meaningful static findings; scope is clear and limited. |
+| `install with sandbox` | Useful, but it touches network, package managers, or broad local state. |
+| `patch first` | Risk is fixable: pin dependencies, add confirmations, redact logs, narrow paths. |
+| `reject` | Secret exfiltration, concealed remote execution, broad destructive actions, or approval bypasses. |
 
-The bundled script can also emit JSON for automation.
+## Suggested Agent Prompt
+
+```text
+Use $skill-auditor to audit this repository before installation:
+https://github.com/example/suspicious-skill
+
+Give me a verdict, top risks, file/line evidence, and what I should change before installing.
+```
+
+## Repository Layout
+
+```text
+skill-auditor/
+  SKILL.md                    # Agent workflow
+  scripts/audit_skill.py       # Static scanner
+  references/risk-rules.md     # Severity guide and manual review prompts
+  agents/openai.yaml           # Codex UI metadata
+  tests/                       # Scanner tests
+  assets/                      # README visual assets
+```
+
+## Design Principles
+
+- **Read before running.** Never execute a third-party installer just to learn what it does.
+- **Evidence over vibes.** Every serious risk should point to a file and line.
+- **Static first, human review second.** A scanner can focus attention; it cannot prove safety.
+- **Least privilege by default.** Network, secrets, global installs, and broad filesystem access need justification.
+- **Sandbox when uncertain.** Useful skills with unclear behavior belong in disposable environments first.
 
 ## Limits
 
-This is static analysis plus human review guidance. It can find obvious risk patterns, but it cannot prove a third-party skill is safe.
+This project is not a malware detector and cannot prove a repository is safe. It catches common static risk patterns and gives an agent a disciplined review process. A clean scan still requires human judgment.
+
+## Development
+
+Run tests:
+
+```bash
+python -m unittest discover -s tests
+```
+
+Validate the skill metadata with your local skill validator if available:
+
+```bash
+python path/to/quick_validate.py ./skill-auditor
+```
+
+Run a self-audit:
+
+```bash
+python scripts/audit_skill.py .
+```
+
+## Roadmap
+
+- GitHub Action for pull request comments
+- SARIF output for code scanning integrations
+- stronger manifest and lifecycle-script parsing
+- allowlist configuration for trusted internal domains
+- richer MCP/server permission review
+
+## License
+
+MIT
