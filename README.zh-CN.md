@@ -53,7 +53,7 @@ git clone https://github.com/Danrry1996/skill-auditor.git "$env:USERPROFILE\.cod
 然后对 agent 说：
 
 ```text
-Use $skill-auditor to review this skill before I install it: <path-or-url>
+请使用 $skill-auditor 在我安装前审计这个 skill：<path-or-url>
 ```
 
 ## 直接运行扫描器
@@ -106,10 +106,10 @@ python scripts/audit_skill.py ./some-skill --json > audit-report.json
 ## 推荐提示词
 
 ```text
-Use $skill-auditor to audit this repository before installation:
+请使用 $skill-auditor 在安装前审计这个仓库：
 https://github.com/example/suspicious-skill
 
-Give me a verdict, top risks, file/line evidence, and what I should change before installing.
+请给我审计结论、主要风险、文件/行号证据，以及安装前应该修改的地方。
 ```
 
 ## 仓库结构
