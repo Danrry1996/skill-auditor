@@ -158,11 +158,27 @@ python scripts/audit_skill.py .
 
 ## Roadmap
 
-- GitHub Action for pull request comments
-- SARIF output for code scanning integrations
-- stronger manifest and lifecycle-script parsing
-- allowlist configuration for trusted internal domains
-- richer MCP/server permission review
+**1. Core Audit Experience**
+
+- [x] Agent workflow for `install`, `install with sandbox`, `patch first`, and `reject` verdicts.
+- [x] Local static scanner with Markdown and JSON output.
+- [x] File/line evidence for every static finding.
+- [x] Built-in risk rule reference for manual review.
+- [ ] Configurable allowlist for trusted internal domains.
+
+**2. Automation Integrations**
+
+- [ ] GitHub Action for pull request audit comments.
+- [ ] SARIF output for code scanning integrations.
+- [ ] CI-friendly exit codes and risk thresholds.
+- [ ] Machine-readable configuration for rule tuning.
+
+**3. Deeper Security Coverage**
+
+- [ ] Stronger manifest and lifecycle-script parsing.
+- [ ] Richer MCP/server permission review.
+- [ ] Dependency pinning and checksum checks.
+- [ ] Sandbox install recipe generation.
 
 ## License
 

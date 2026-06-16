@@ -158,11 +158,27 @@ python scripts/audit_skill.py .
 
 ## 路线图
 
-- GitHub Action：在 PR 中自动评论审计结果
-- SARIF 输出：接入 code scanning
-- 更强的 manifest 和 lifecycle script 解析
-- 可信内部域名 allowlist 配置
-- 更完整的 MCP/server 权限审阅
+**1. 核心审计能力**
+
+- [x] Agent 审计流程：`install`、`install with sandbox`、`patch first`、`reject`。
+- [x] 本地静态扫描器，支持 Markdown 和 JSON 输出。
+- [x] 每个静态风险项都包含文件/行号证据。
+- [x] 内置风险规则参考，辅助人工复核。
+- [ ] 可信内部域名 allowlist 配置。
+
+**2. 自动化集成能力**
+
+- [ ] GitHub Action：在 PR 中自动评论审计结果。
+- [ ] SARIF 输出：接入 code scanning。
+- [ ] 面向 CI 的退出码和风险阈值。
+- [ ] 可机器读取的规则配置文件。
+
+**3. 深度安全覆盖**
+
+- [ ] 更强的 manifest 和 lifecycle script 解析。
+- [ ] 更完整的 MCP/server 权限审阅。
+- [ ] 依赖 pinning 和 checksum 检查。
+- [ ] 沙箱安装建议生成。
 
 ## 许可证
 
